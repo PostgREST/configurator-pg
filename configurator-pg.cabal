@@ -1,0 +1,59 @@
+cabal-version:       >= 1.12
+name:                configurator-pg
+version:             0.1.0.0
+synopsis:            Reduced parser for configurator-ng config files
+description:
+  This module provides a simplified and updated interface to the
+  configuration file format of
+  <https://hackage.haskell.org/package/configurator> and
+  <https://hackage.haskell.org/package/configurator-ng>.
+  Its aim is primarily to allow updating programs that depend on
+  configurator-ng to new versions of GHC without changing the
+  configuration file format.
+homepage:            https://github.com/robx/configurator-pg
+bug-reports:         https://github.com/robx/configurator-pg/issues
+license:             BSD3
+license-file:        LICENSE
+author:              Robert Vollmert
+maintainer:          rob@vllmrt.net
+copyright:           Copyright 2011 MailRank, Inc.
+                     Copyright 2011-2014 Bryan O'Sullivan
+                     Copyright 2015-2016 Leon P Smith
+                     Copyright 2019 Robert Vollmert
+category:            Configuration, Data
+extra-source-files:  CHANGELOG.md
+build-type:          Simple
+
+library
+  exposed-modules:     Data.Configurator
+  other-modules:       Data.Configurator.Load
+                       Data.Configurator.Parser
+                       Data.Configurator.Syntax
+                       Data.Configurator.Types
+  build-depends:       base >= 4.9 && < 4.13
+                     , attoparsec
+                     , containers
+                     , protolude >= 0.2.2
+                     , scientific
+                     , text
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  default-extensions:  OverloadedStrings, NoImplicitPrelude
+  ghc-options: -Wall -Werror
+
+test-suite tests
+  type:                exitcode-stdio-1.0
+  main-is:             Test.hs
+  hs-source-dirs:      tests
+  build-depends:       base
+                     , configurator-pg
+                     , HUnit
+                     , bytestring
+                     , filepath
+                     , protolude >= 0.2.2
+                     , test-framework
+                     , test-framework-hunit
+                     , text
+  default-language:    Haskell2010
+  default-extensions:  OverloadedStrings, NoImplicitPrelude
+  ghc-options: -Wall -Werror
