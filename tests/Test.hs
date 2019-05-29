@@ -2,7 +2,7 @@
 
 module Main where
 
-import Prelude hiding (lookup)
+import Protolude hiding (bool, list, optional)
 
 import           Data.Configurator
 import           Data.Function                  (on)

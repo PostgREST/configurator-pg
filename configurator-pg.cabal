@@ -30,7 +30,7 @@ library
                        Data.Configurator.Parser
                        Data.Configurator.Syntax
                        Data.Configurator.Types
-  build-depends:       base >= 4.8 && < 4.12
+  build-depends:       base >= 4.9 && < 4.13
                      , attoparsec
                      , containers
                      , protolude >= 0.2.2
@@ -50,6 +50,7 @@ test-suite tests
                      , HUnit
                      , bytestring
                      , filepath
+                     , protolude >= 0.2.2
                      , test-framework
                      , test-framework-hunit
                      , text
