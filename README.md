@@ -10,8 +10,7 @@ continues to read existing configuration files.
 ## Changes
 
 configurator-pg skips some of configurator-ng's features, and
-changes the API in other places. In particular, there is not
-configuration file reloading. Furthermore
+changes the API in other places:
 
   * No configuration file reloading.
   * Simplified parsing API:
