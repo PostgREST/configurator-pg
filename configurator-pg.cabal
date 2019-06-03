@@ -1,12 +1,12 @@
-cabal-version:       >= 1.12
+cabal-version:       1.12
 name:                configurator-pg
 version:             0.1.0.0
 synopsis:            Reduced parser for configurator-ng config files
 description:
   This module provides a simplified and updated interface to the
   configuration file format of
-  <https://hackage.haskell.org/package/configurator> and
-  <https://hackage.haskell.org/package/configurator-ng>.
+  <https://hackage.haskell.org/package/configurator configurator> and
+  <https://hackage.haskell.org/package/configurator-ng configurator-ng>.
   Its aim is primarily to allow updating programs that depend on
   configurator-ng to new versions of GHC without changing the
   configuration file format.
@@ -39,7 +39,7 @@ library
   hs-source-dirs:      src
   default-language:    Haskell2010
   default-extensions:  OverloadedStrings, NoImplicitPrelude
-  ghc-options: -Wall -Werror
+  ghc-options: -Wall
 
 test-suite tests
   type:                exitcode-stdio-1.0
@@ -56,4 +56,4 @@ test-suite tests
                      , text                 >= 1.2.2.2 && < 1.3
   default-language:    Haskell2010
   default-extensions:  OverloadedStrings, NoImplicitPrelude
-  ghc-options: -Wall -Werror
+  ghc-options: -Wall
