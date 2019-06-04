@@ -21,7 +21,8 @@ copyright:           Copyright 2011 MailRank, Inc.
                      Copyright 2015-2016 Leon P Smith
                      Copyright 2019 Robert Vollmert
 category:            Configuration, Data
-extra-source-files:  CHANGELOG.md, README.md
+extra-source-files:  CHANGELOG.md, README.md,
+                     tests/resources/*.cfg
 build-type:          Simple
 
 library
