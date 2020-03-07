@@ -1,5 +1,9 @@
 # Revision history for configurator-pg
 
+## 0.1.0.4 -- 2020-03-07
+
+* Relax bounds to support GHC 8.8.3.
+
 ## 0.1.0.3 -- 2019-06-04
 
 * Include another missing test data file.
