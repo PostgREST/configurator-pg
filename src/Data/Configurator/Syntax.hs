@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeFamilies #-}
 
 -- |
 -- Module:      Data.Configurator.Syntax
@@ -20,29 +21,33 @@ module Data.Configurator.Syntax
 import Protolude hiding (First, try)
 
 import           Control.Monad           (fail)
-import           Data.Attoparsec.Text    as A
+import           Text.Megaparsec
+import           Text.Megaparsec.Char
+import           Text.Megaparsec.Char.Lexer
 import           Data.Char               (isAlpha, isAlphaNum, isSpace)
 import           Data.Configurator.Types
 import qualified Data.Text               as T
 import qualified Data.Text.Lazy          as L
 import           Data.Text.Lazy.Builder  (fromText, singleton,
                                           toLazyText)
+type Parser = Parsec Void Text
 
 topLevel :: Parser [Directive]
-topLevel = directives <* skipLWS <* endOfInput
+topLevel = directives <* skipLWS <* eof
 
 directive :: Parser Directive
 directive =
-  mconcat [
-    string "import" *> skipLWS *> (Import <$> string_)
-  , string "#;" *> skipHWS *> (DirectiveComment <$> directive)
-  , Bind <$> try (ident <* skipLWS <* char '=' <* skipLWS) <*> value
-  , Group <$> try (ident <* skipLWS <* char '{' <* skipLWS)
-          <*> directives <* skipLWS <* char '}'
+  choice [
+    try (string "import" *> skipLWS *> (Import <$> string_))
+  , try (string "#;") *> skipHWS *> (DirectiveComment <$> directive)
+  , (\ i f -> f i) <$> try ident <* skipLWS <*> (bindRHS <|> groupRHS)
   ]
+  where
+    bindRHS = char '=' *> skipLWS *> (flip Bind <$> value)
+    groupRHS = char '{' *> skipLWS *> (flip Group <$> directives) <* skipLWS <* char '}'
 
 directives :: Parser [Directive]
-directives = (skipLWS *> directive <* skipHWS) `sepBy`
+directives = try (skipLWS *> directive <* skipHWS) `sepEndBy`
              (satisfy $ \c -> c == '\r' || c == '\n')
 
 data Skip = Space | Comment
@@ -51,16 +56,27 @@ data Skip = Space | Comment
 skipLWS :: Parser ()
 skipLWS = loop
   where
-    loop = A.takeWhile isSpace >> ((comment >> loop) <|> return ())
+    loop = takeWhileP (Just "space") isSpace >> ((comment >> loop) <|> return ())
 
-    comment = try beginComment >> A.takeWhile (\c -> c /= '\r' && c /= '\n')
+    comment = try beginComment >> takeWhileP Nothing (\c -> c /= '\r' && c /= '\n')
 
     beginComment = do
-      _ <- A.char '#'
+      _ <- char '#'
       mc <- peekChar
       case mc of
         Just ';' -> fail ""
         _        -> return ()
+
+    peekChar = optional (lookAhead anySingle)
+
+scan :: s -> (s -> Char -> Maybe s) -> Parser Text
+scan s f = fst <$> match (p s)
+  where
+    p st = eof <|> do
+      c <- lookAhead anySingle
+      case f st c of
+        Nothing -> return ()
+        Just st' -> anySingle >> p st'
 
 -- | Skip comments or horizontal white space.
 skipHWS :: Parser ()
@@ -96,7 +112,7 @@ ident = do
            else Nothing
 
 value :: Parser Value
-value = mconcat [
+value = choice [
           string "on" *> pure (Bool True)
         , string "off" *> pure (Bool False)
         , string "true" *> pure (Bool True)
@@ -122,18 +138,18 @@ brackets :: Char -> Char -> Parser a -> Parser a
 brackets open close p = char open *> skipLWS *> p <* char close
 
 embed :: Parser a -> Text -> Parser a
-embed p s = case parseOnly p s of
-              Left err -> fail err
-              Right v  -> return v
+embed p s = case parse p "(embed)" s of
+              Left _  -> fail "embedded parser failed"
+              Right v -> return v
 
 unescape :: Text -> Parser Text
 unescape = fmap (L.toStrict . toLazyText) . embed (p mempty)
  where
   p acc = do
-    h <- A.takeWhile (/='\\')
+    h <- takeWhileP Nothing (/='\\')
     let rest = do
           let cont c = p (acc `mappend` fromText h `mappend` singleton c)
-          c <- char '\\' *> satisfy (inClass "ntru\"\\")
+          c <- char '\\' *> oneOf ("ntru\"\\" :: [Char])
           case c of
             'n'  -> cont '\n'
             't'  -> cont '\t'
@@ -148,11 +164,11 @@ unescape = fmap (L.toStrict . toLazyText) . embed (p mempty)
 
 hexQuad :: Parser Char
 hexQuad = do
-  a <- embed hexadecimal =<< A.take 4
+  a <- embed hexadecimal =<< takeP Nothing 4
   if a < 0xd800 || a > 0xdfff
     then return (chr a)
     else do
-      b <- embed hexadecimal =<< string "\\u" *> A.take 4
+      b <- embed hexadecimal =<< string "\\u" *> takeP Nothing 4
       if a <= 0xdbff && b >= 0xdc00 && b <= 0xdfff
         then return $! chr (((a - 0xd800) `shiftL` 10) + (b - 0xdc00) + 0x10000)
         else fail "invalid UTF-16 surrogates"
@@ -165,13 +181,13 @@ interp :: Parser [Interpolate]
 interp = reverse <$> p []
  where
   p acc = do
-    h <- Literal <$> A.takeWhile (/='$')
+    h <- Literal <$> takeWhileP Nothing (/='$')
     let rest = do
           let cont x = p (x : h : acc)
           c <- char '$' *> satisfy (\c -> c == '$' || c == '(')
           case c of
             '$' -> cont (Literal (T.singleton '$'))
-            _   -> (cont . Interpolate) =<< A.takeWhile1 (/=')') <* char ')'
+            _   -> (cont . Interpolate) =<< takeWhile1P Nothing (/=')') <* char ')'
     done <- atEnd
     if done
       then return (h : acc)

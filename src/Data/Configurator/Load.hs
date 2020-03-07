@@ -5,7 +5,7 @@ module Data.Configurator.Load
 import Protolude
 
 import           Control.Exception                (throw)
-import qualified Data.Attoparsec.Text             as A
+import           Text.Megaparsec                  (parse, errorBundlePretty)
 import qualified Data.Map.Strict                  as M
 import           Data.Scientific                  (toBoundedInteger,
                                                    toRealFloat)
@@ -32,8 +32,8 @@ load path = applyDirective "" "" M.empty (Import $ T.pack path)
 loadOne :: Path -> IO [Directive]
 loadOne path = do
   s <- readFile (T.unpack path)
-  case A.parseOnly topLevel s of
-    Left err         -> throw $ ParseError $ "parsing " <> path <> ": " <> T.pack err
+  case parse topLevel (T.unpack path) s of
+    Left err         -> throw $ ParseError $ T.pack $ errorBundlePretty err
     Right directives -> return directives
 
 applyDirective :: Key -> Path -> Config -> Directive -> IO Config
@@ -55,8 +55,8 @@ applyDirective prefix path config directive = case directive of
 interpolate :: Key -> Text -> Config -> IO Text
 interpolate prefix s config
   | "$" `T.isInfixOf` s =
-    case A.parseOnly interp s of
-      Left err   -> throw $ ParseError $ "parsing interpolation: " <> T.pack err
+    case parse interp "(interpolated)" s of
+      Left err   -> throw $ ParseError $ T.pack $ errorBundlePretty err
       Right xs -> TL.toStrict . toLazyText . mconcat <$> mapM interpret xs
   | otherwise = return s
 
