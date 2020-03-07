@@ -16,6 +16,7 @@ module Data.Configurator.Parser
 
 import Protolude hiding (bool, list, optional)
 
+import           Control.Monad.Fail
 import           Data.Functor.Compose
 import qualified Data.Map.Strict      as M
 import qualified Data.Scientific      as Scientific
@@ -44,6 +45,9 @@ runParser = getCompose . getParser
 
 instance Monad (Parser a) where
   p >>= f = makeParser $ \v -> runParser p v >>= \w -> runParser (f w) v
+
+instance MonadFail (Parser a) where
+  fail s = makeParser (const (Left (T.pack s)))
 
 -- | Parse a required configuration field.
 --
