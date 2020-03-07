@@ -5,10 +5,6 @@ module Main where
 import Protolude hiding (bool, list, optional)
 
 import           Data.Configurator
-import           Data.Function                  (on)
-import           Data.List                      (sortBy)
-import           Data.Maybe                     (fromMaybe)
-import           Data.Text                      (Text)
 import qualified Data.Text                      as T
 import           System.Environment
 import           System.FilePath

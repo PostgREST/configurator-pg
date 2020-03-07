@@ -19,14 +19,10 @@ module Data.Configurator.Syntax
 
 import Protolude hiding (First, try)
 
-import           Control.Monad           (fail, when)
+import           Control.Monad           (fail)
 import           Data.Attoparsec.Text    as A
-import           Data.Bits               (shiftL)
-import           Data.Char               (chr, isAlpha, isAlphaNum,
-                                          isSpace)
+import           Data.Char               (isAlpha, isAlphaNum, isSpace)
 import           Data.Configurator.Types
-import           Data.Monoid             (Monoid (..))
-import           Data.Text               (Text)
 import qualified Data.Text               as T
 import qualified Data.Text.Lazy          as L
 import           Data.Text.Lazy.Builder  (fromText, singleton,

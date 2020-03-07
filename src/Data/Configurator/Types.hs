@@ -10,7 +10,6 @@ module Data.Configurator.Types
 
 import Protolude
 
-import Data.Map.Strict (Map)
 import Data.Scientific (Scientific)
 
 -- | An error that occurred during the low-level parsing of a configuration file.

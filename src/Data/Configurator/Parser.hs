@@ -19,7 +19,6 @@ import Protolude hiding (bool, list, optional)
 import           Data.Functor.Compose
 import qualified Data.Map.Strict      as M
 import qualified Data.Scientific      as Scientific
-import           Data.Text            (Text)
 import qualified Data.Text            as T
 
 import Data.Configurator.Types
