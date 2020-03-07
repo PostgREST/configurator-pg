@@ -1,5 +1,10 @@
 # Revision history for configurator-pg
 
+## 0.1.0.5 -- 2020-03-07
+
+* Provide a MonadFail instance for Parser.
+  This fixes a PostgREST compile failure with GHC 8.8.3.
+
 ## 0.1.0.4 -- 2020-03-07
 
 * Relax bounds to support GHC 8.8.3.
