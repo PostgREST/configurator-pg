@@ -50,8 +50,6 @@ directives :: Parser [Directive]
 directives = try (skipLWS *> directive <* skipHWS) `sepEndBy`
              (satisfy $ \c -> c == '\r' || c == '\n')
 
-data Skip = Space | Comment
-
 -- | Skip lines, comments, or horizontal white space.
 skipLWS :: Parser ()
 skipLWS = Lexer.space space1 comment empty
@@ -78,14 +76,10 @@ scan s f = fst <$> match (p s)
 
 -- | Skip comments or horizontal white space.
 skipHWS :: Parser ()
-skipHWS = scan Space go *> pure ()
-  where go Space ' '    = Just Space
-        go Space '\t'   = Just Space
-        go Space '#'    = Just Comment
-        go Space _      = Nothing
-        go Comment '\r' = Nothing
-        go Comment '\n' = Nothing
-        go Comment _    = Just Comment
+skipHWS = Lexer.space
+            (satisfy (\c -> c == ' ' || c == '\t') >> return ())
+            (Lexer.skipLineComment "#")
+            empty
 
 data IdentState = First | Follow
 
