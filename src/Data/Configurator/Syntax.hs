@@ -103,7 +103,7 @@ string_ = T.pack <$> str
   str = char '"' *> manyTill charLiteral (char '"')
 
 brackets :: Char -> Char -> Parser a -> Parser a
-brackets open close p = char open *> skipLWS *> p <* char close
+brackets open close p = between (char open *> skipLWS) (char close) p
 
 charLiteral :: Parser Char
 charLiteral = choice
