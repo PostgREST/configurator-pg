@@ -1,5 +1,10 @@
 # Revision history for configurator-pg
 
+* Rewrite file parser with Megaparsec instead of
+  Attoparsec for better error messages. No expected
+  change in functionality except possibly in
+  pathological cases.
+
 ## 0.1.0.6 -- 2020-03-08
 
 * Fix GHC 7.10 build by depending on package fail.
