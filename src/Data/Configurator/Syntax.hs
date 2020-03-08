@@ -79,15 +79,19 @@ identifier = fst <$> match (word `sepBy1` char '.')
 
 value :: Parser Value
 value = choice [
-          string "on" *> pure (Bool True)
-        , string "off" *> pure (Bool False)
-        , string "true" *> pure (Bool True)
-        , string "false" *> pure (Bool False)
+          Bool <$> boolean
         , String <$> string_
         , Number <$> Lexer.scientific
         , List <$> brackets '[' ']'
                    ((value <* skipLWS) `sepBy` (char ',' <* skipLWS))
         ]
+ where
+  boolean = choice
+   [ string "on" *> pure True
+   , string "off" *> pure False
+   , string "true" *> pure True
+   , string "false" *> pure False
+   ]
 
 string_ :: Parser Text
 string_ = T.pack <$> str
