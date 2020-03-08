@@ -23,8 +23,8 @@ import Protolude hiding (First, try)
 import           Control.Monad           (fail)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
-import           Text.Megaparsec.Char.Lexer
-import           Data.Char               (isAlpha, isAlphaNum, isSpace)
+import qualified Text.Megaparsec.Char.Lexer as Lexer
+import           Data.Char               (isAlpha, isAlphaNum)
 import           Data.Configurator.Types
 import qualified Data.Text               as T
 import qualified Data.Text.Lazy          as L
@@ -54,20 +54,18 @@ data Skip = Space | Comment
 
 -- | Skip lines, comments, or horizontal white space.
 skipLWS :: Parser ()
-skipLWS = loop
+skipLWS = Lexer.space space1 comment empty
   where
-    loop = takeWhileP (Just "space") isSpace >> ((comment >> loop) <|> return ())
+    comment = try beginComment >> takeWhileP Nothing (\c -> c /= '\r' && c /= '\n') >> return ()
 
-    comment = try beginComment >> takeWhileP Nothing (\c -> c /= '\r' && c /= '\n')
-
+    -- match start of comment that is not a directive-comment
     beginComment = do
       _ <- char '#'
-      mc <- peekChar
+      mc <- optional (lookAhead anySingle)
       case mc of
         Just ';' -> fail ""
         _        -> return ()
 
-    peekChar = optional (lookAhead anySingle)
 
 scan :: s -> (s -> Char -> Maybe s) -> Parser Text
 scan s f = fst <$> match (p s)
@@ -118,7 +116,7 @@ value = choice [
         , string "true" *> pure (Bool True)
         , string "false" *> pure (Bool False)
         , String <$> string_
-        , Number <$> scientific
+        , Number <$> Lexer.scientific
         , List <$> brackets '[' ']'
                    ((value <* skipLWS) `sepBy` (char ',' <* skipLWS))
         ]
@@ -164,11 +162,11 @@ unescape = fmap (L.toStrict . toLazyText) . embed (p mempty)
 
 hexQuad :: Parser Char
 hexQuad = do
-  a <- embed hexadecimal =<< takeP Nothing 4
+  a <- embed Lexer.hexadecimal =<< takeP Nothing 4
   if a < 0xd800 || a > 0xdfff
     then return (chr a)
     else do
-      b <- embed hexadecimal =<< string "\\u" *> takeP Nothing 4
+      b <- embed Lexer.hexadecimal =<< string "\\u" *> takeP Nothing 4
       if a <= 0xdbff && b >= 0xdc00 && b <= 0xdfff
         then return $! chr (((a - 0xd800) `shiftL` 10) + (b - 0xdc00) + 0x10000)
         else fail "invalid UTF-16 surrogates"
