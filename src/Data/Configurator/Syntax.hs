@@ -44,13 +44,13 @@ directive =
          Left KeywordImport -> Import <$> string_
          Right ident        -> choice
            [ char '=' *> skipLWS *> (Bind ident <$> value)
-           , char '{' *> skipLWS *> (Group ident <$> directives) <* skipLWS <* char '}'
+           , brackets '{' '}' (Group ident <$> directives)
            ]
    , string "#;" *> skipHWS *> (DirectiveComment <$> directive)
    ]
 
 directives :: Parser [Directive]
-directives = (directive <* skipHWS) `sepEndBy` (eol >> skipLWS)
+directives = (directive <* skipHWS) `sepEndBy` (eol *> skipLWS) <* skipLWS
 
 -- | Skip lines, comments, or horizontal white space.
 skipLWS :: Parser ()
