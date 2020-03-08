@@ -1,5 +1,9 @@
 # Revision history for configurator-pg
 
+## 0.1.0.6 -- 2020-03-08
+
+* Fix GHC 7.10 build by depending on package fail.
+
 ## 0.1.0.5 -- 2020-03-07
 
 * Provide a MonadFail instance for Parser.
