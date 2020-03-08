@@ -33,13 +33,18 @@ type Parser = Parsec Void Text
 topLevel :: Parser [Directive]
 topLevel = directives <* skipLWS <* eof
 
+data Keyword = KeywordImport
+
 directive :: Parser Directive
 directive =
-  choice [
-    try (string "import" *> skipLWS *> (Import <$> string_))
-  , try (string "#;") *> skipHWS *> (DirectiveComment <$> directive)
-  , (\ i f -> f i) <$> try ident <* skipLWS <*> (bindRHS <|> groupRHS)
-  ]
+  choice
+   [ do
+       w <- try keywordOrIdentifier <* skipLWS
+       case w of
+         Left KeywordImport -> Import <$> string_
+         Right ident        -> (\ f -> f ident) <$> (bindRHS <|> groupRHS)
+   , try (string "#;") *> skipHWS *> (DirectiveComment <$> directive)
+   ]
   where
     bindRHS = char '=' *> skipLWS *> (flip Bind <$> value)
     groupRHS = char '{' *> skipLWS *> (flip Group <$> directives) <* skipLWS <* char '}'
@@ -70,14 +75,16 @@ skipHWS = Lexer.space
             (Lexer.skipLineComment "#")
             empty
 
-ident :: Parser Key
-ident = do
+keywordOrIdentifier :: Parser (Either Keyword Key)
+keywordOrIdentifier = do
   n <- fst <$> match (word `sepBy1` char '.')
-  when (n == "import") $
-    fail $ "reserved word (" ++ show n ++ ") used as identifier"
-  return n
+  return $ case n of
+    "import" -> Left KeywordImport
+    _ ->        Right n
  where
-  word = T.cons <$> letterChar <*> takeWhileP (Just "alphanumeric character") (\c -> Char.isAlphaNum c || c == '_' || c == '-')
+  word = T.cons <$> letterChar <*> takeWhileP (Just "alphanumeric character") isIdentifier
+  isIdentifier c = Char.isAlphaNum c || c == '_' || c == '-'
+
 
 value :: Parser Value
 value = choice [
