@@ -56,16 +56,8 @@ directives = (directive <* skipHWS) `sepEndBy` (eol *> skipLWS) <* skipLWS
 skipLWS :: Parser ()
 skipLWS = Lexer.space space1 comment empty
   where
-    comment = try beginComment >> takeWhileP Nothing (\c -> c /= '\r' && c /= '\n') >> return ()
-
-    -- match start of comment that is not a directive-comment
-    beginComment = do
-      _ <- char '#'
-      mc <- optional (lookAhead anySingle)
-      case mc of
-        Just ';' -> fail ""
-        _        -> return ()
-
+    beginComment = char '#' *> notFollowedBy (char ';')
+    comment = try beginComment <* takeWhileP Nothing (\c -> c /= '\r' && c /= '\n')
 
 -- | Skip comments or horizontal white space.
 skipHWS :: Parser ()
