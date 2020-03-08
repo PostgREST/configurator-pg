@@ -17,7 +17,9 @@ main = defaultMain tests
 
 tests :: [Test]
 tests =
-    [ testCase "read" readTest
+    [ testCase "read-simple" $ readTest "simple.cfg"
+    , testCase "read-pathological" $ readTest "pathological.cfg"
+    , testCase "load" loadTest
     , testCase "load" loadTest
     , testCase "types" typesTest
     , testCase "interp" interpTest
@@ -41,8 +43,8 @@ parseOpt cfg p key = runParser (optional key p) cfg
 parseSub :: Config -> Parser Value a -> Key -> Either Text [(Key, a)]
 parseSub cfg p prefix = runParser (subassocs prefix p) cfg
 
-readTest :: Assertion
-readTest = load (testFile "pathological.cfg") >> return ()
+readTest :: FilePath -> Assertion
+readTest file = load (testFile file) >> return ()
 
 loadTest :: Assertion
 loadTest =
