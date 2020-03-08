@@ -42,12 +42,12 @@ directive =
        w <- keywordOrIdentifier <* skipLWS
        case w of
          Left KeywordImport -> Import <$> string_
-         Right ident        -> (\ f -> f ident) <$> (bindRHS <|> groupRHS)
+         Right ident        -> choice
+           [ char '=' *> skipLWS *> (Bind ident <$> value)
+           , char '{' *> skipLWS *> (Group ident <$> directives) <* skipLWS <* char '}'
+           ]
    , string "#;" *> skipHWS *> (DirectiveComment <$> directive)
    ]
-  where
-    bindRHS = char '=' *> skipLWS *> (flip Bind <$> value)
-    groupRHS = char '{' *> skipLWS *> (flip Group <$> directives) <* skipLWS <* char '}'
 
 directives :: Parser [Directive]
 directives = (directive <* skipHWS) `sepEndBy` (eol >> skipLWS)
