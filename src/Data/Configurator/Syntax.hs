@@ -24,7 +24,7 @@ import           Control.Monad           (fail)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as Lexer
-import           Data.Char               (isAlpha, isAlphaNum)
+import           Data.Char               (isAlphaNum)
 import           Data.Configurator.Types
 import qualified Data.Text               as T
 import qualified Data.Text.Lazy          as L
@@ -81,27 +81,14 @@ skipHWS = Lexer.space
             (Lexer.skipLineComment "#")
             empty
 
-data IdentState = First | Follow
-
 ident :: Parser Key
 ident = do
-  n <- scan First go
+  n <- fst <$> match (word `sepBy1` char '.')
   when (n == "import") $
     fail $ "reserved word (" ++ show n ++ ") used as identifier"
-  when (T.null n) $ fail "no identifier found"
-  when (T.last n == '.') $ fail "identifier must not end with a dot"
   return n
  where
-  go First c =
-      if isAlpha c
-      then Just Follow
-      else Nothing
-  go Follow c =
-      if isAlphaNum c || c == '_' || c == '-'
-      then Just Follow
-      else if c == '.'
-           then Just First
-           else Nothing
+  word = T.cons <$> letterChar <*> takeWhileP (Just "alphanumeric character") (\c -> isAlphaNum c || c == '_' || c == '-')
 
 value :: Parser Value
 value = choice [
