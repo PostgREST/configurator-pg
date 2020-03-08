@@ -50,8 +50,7 @@ directive =
     groupRHS = char '{' *> skipLWS *> (flip Group <$> directives) <* skipLWS <* char '}'
 
 directives :: Parser [Directive]
-directives = try (skipLWS *> directive <* skipHWS) `sepEndBy`
-             (satisfy $ \c -> c == '\r' || c == '\n')
+directives = try (skipLWS *> directive <* skipHWS) `sepEndBy` eol
 
 -- | Skip lines, comments, or horizontal white space.
 skipLWS :: Parser ()
