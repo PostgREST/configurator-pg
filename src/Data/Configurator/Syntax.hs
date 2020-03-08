@@ -27,9 +27,7 @@ import qualified Text.Megaparsec.Char.Lexer as Lexer
 import           Data.Char               (isAlphaNum)
 import           Data.Configurator.Types
 import qualified Data.Text               as T
-import qualified Data.Text.Lazy          as L
-import           Data.Text.Lazy.Builder  (fromText, singleton,
-                                          toLazyText)
+
 type Parser = Parsec Void Text
 
 topLevel :: Parser [Directive]
@@ -103,15 +101,9 @@ value = choice [
         ]
 
 string_ :: Parser Text
-string_ = do
-  s <- char '"' *> scan False isChar <* char '"'
-  if "\\" `T.isInfixOf` s
-    then unescape s
-    else return s
+string_ = T.pack <$> str
  where
-  isChar True _ = Just False
-  isChar _ '"'  = Nothing
-  isChar _ c    = Just (c == '\\')
+  str = char '"' *> manyTill charLiteral (char '"')
 
 brackets :: Char -> Char -> Parser a -> Parser a
 brackets open close p = char open *> skipLWS *> p <* char close
@@ -121,25 +113,21 @@ embed p s = case parse p "(embed)" s of
               Left _  -> fail "embedded parser failed"
               Right v -> return v
 
-unescape :: Text -> Parser Text
-unescape = fmap (L.toStrict . toLazyText) . embed (p mempty)
+charLiteral :: Parser Char
+charLiteral = choice
+  [ char '\\' *> parseEscape
+  , anySingle
+  ]
  where
-  p acc = do
-    h <- takeWhileP Nothing (/='\\')
-    let rest = do
-          let cont c = p (acc `mappend` fromText h `mappend` singleton c)
-          c <- char '\\' *> oneOf ("ntru\"\\" :: [Char])
-          case c of
-            'n'  -> cont '\n'
-            't'  -> cont '\t'
-            'r'  -> cont '\r'
-            '"'  -> cont '"'
-            '\\' -> cont '\\'
-            _    -> cont =<< hexQuad
-    done <- atEnd
-    if done
-      then return (acc `mappend` fromText h)
-      else rest
+  parseEscape = do
+    c <- oneOf ("ntru\"\\" :: [Char])
+    case c of
+      'n'  -> pure '\n'
+      't'  -> pure '\t'
+      'r'  -> pure '\r'
+      '"'  -> pure '"'
+      '\\' -> pure '\\'
+      _    -> hexQuad
 
 hexQuad :: Parser Char
 hexQuad = do
