@@ -31,7 +31,7 @@ import qualified Data.Text               as T
 type Parser = Parsec Void Text
 
 topLevel :: Parser [Directive]
-topLevel = directives <* skipLWS <* eof
+topLevel = skipLWS *> directives <* skipLWS <* eof
 
 data Keyword = KeywordImport
 
@@ -50,7 +50,7 @@ directive =
     groupRHS = char '{' *> skipLWS *> (flip Group <$> directives) <* skipLWS <* char '}'
 
 directives :: Parser [Directive]
-directives = try (skipLWS *> directive <* skipHWS) `sepEndBy` eol
+directives = (directive <* skipHWS) `sepEndBy` (eol >> skipLWS)
 
 -- | Skip lines, comments, or horizontal white space.
 skipLWS :: Parser ()
