@@ -1,0 +1,6 @@
+<c>:1:26:
+  |
+1 | $( let's never close this
+  |                          ^
+unexpected end of input
+expecting ')'

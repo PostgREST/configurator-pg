@@ -1,0 +1,1 @@
+tests/resources/not-exist.cfg: openFile: does not exist (No such file or directory)
