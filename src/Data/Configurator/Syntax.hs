@@ -63,15 +63,6 @@ skipLWS = Lexer.space space1 comment empty
         _        -> return ()
 
 
-scan :: s -> (s -> Char -> Maybe s) -> Parser Text
-scan s f = fst <$> match (p s)
-  where
-    p st = eof <|> do
-      c <- lookAhead anySingle
-      case f st c of
-        Nothing -> return ()
-        Just st' -> anySingle >> p st'
-
 -- | Skip comments or horizontal white space.
 skipHWS :: Parser ()
 skipHWS = Lexer.space
