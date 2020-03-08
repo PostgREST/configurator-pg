@@ -39,11 +39,11 @@ directive :: Parser Directive
 directive =
   choice
    [ do
-       w <- try keywordOrIdentifier <* skipLWS
+       w <- keywordOrIdentifier <* skipLWS
        case w of
          Left KeywordImport -> Import <$> string_
          Right ident        -> (\ f -> f ident) <$> (bindRHS <|> groupRHS)
-   , try (string "#;") *> skipHWS *> (DirectiveComment <$> directive)
+   , string "#;" *> skipHWS *> (DirectiveComment <$> directive)
    ]
   where
     bindRHS = char '=' *> skipLWS *> (flip Bind <$> value)
