@@ -24,7 +24,7 @@ import           Control.Monad           (fail)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as Lexer
-import           Data.Char               (isAlphaNum)
+import qualified Data.Char                  as Char
 import           Data.Configurator.Types
 import qualified Data.Text               as T
 
@@ -77,7 +77,7 @@ ident = do
     fail $ "reserved word (" ++ show n ++ ") used as identifier"
   return n
  where
-  word = T.cons <$> letterChar <*> takeWhileP (Just "alphanumeric character") (\c -> isAlphaNum c || c == '_' || c == '-')
+  word = T.cons <$> letterChar <*> takeWhileP (Just "alphanumeric character") (\c -> Char.isAlphaNum c || c == '_' || c == '-')
 
 value :: Parser Value
 value = choice [
@@ -99,11 +99,6 @@ string_ = T.pack <$> str
 brackets :: Char -> Char -> Parser a -> Parser a
 brackets open close p = char open *> skipLWS *> p <* char close
 
-embed :: Parser a -> Text -> Parser a
-embed p s = case parse p "(embed)" s of
-              Left _  -> fail "embedded parser failed"
-              Right v -> return v
-
 charLiteral :: Parser Char
 charLiteral = choice
   [ char '\\' *> parseEscape
@@ -122,14 +117,18 @@ charLiteral = choice
 
 hexQuad :: Parser Char
 hexQuad = do
-  a <- embed Lexer.hexadecimal =<< takeP Nothing 4
+  a <- quad
   if a < 0xd800 || a > 0xdfff
     then return (chr a)
     else do
-      b <- embed Lexer.hexadecimal =<< string "\\u" *> takeP Nothing 4
+      b <- string "\\u" *> quad
       if a <= 0xdbff && b >= 0xdc00 && b <= 0xdfff
         then return $! chr (((a - 0xd800) `shiftL` 10) + (b - 0xdc00) + 0x10000)
         else fail "invalid UTF-16 surrogates"
+ where
+  quad     = mkNum <$> count 4 (satisfy Char.isHexDigit <?> "hexadecimal digit")
+  mkNum    = foldl' step 0
+  step a c = a * 16 + fromIntegral (Char.digitToInt c)
 
 -- | Parse a string interpolation spec.
 --
