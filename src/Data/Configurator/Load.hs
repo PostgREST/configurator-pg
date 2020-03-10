@@ -5,7 +5,7 @@ module Data.Configurator.Load
 import Protolude
 
 import           Control.Exception                (throw)
-import qualified Data.Attoparsec.Text             as A
+import           Text.Megaparsec                  (parse, errorBundlePretty)
 import qualified Data.Map.Strict                  as M
 import           Data.Scientific                  (toBoundedInteger,
                                                    toRealFloat)
@@ -32,14 +32,14 @@ load path = applyDirective "" "" M.empty (Import $ T.pack path)
 loadOne :: Path -> IO [Directive]
 loadOne path = do
   s <- readFile (T.unpack path)
-  case A.parseOnly topLevel s of
-    Left err         -> throw $ ParseError $ "parsing " <> path <> ": " <> T.pack err
+  case parse topLevel (T.unpack path) s of
+    Left err         -> throw $ ParseError $ T.pack $ errorBundlePretty err
     Right directives -> return directives
 
 applyDirective :: Key -> Path -> Config -> Directive -> IO Config
 applyDirective prefix path config directive = case directive of
   Bind key (String str) -> do
-    v <- interpolate prefix str config
+    v <- interpolate prefix (prefix <> key) str config
     return $! M.insert (prefix <> key) (String v) config
   Bind key value ->
     return $! M.insert (prefix <> key) value config
@@ -52,11 +52,11 @@ applyDirective prefix path config directive = case directive of
       foldM (applyDirective prefix path') config directives
   DirectiveComment _ -> return config
 
-interpolate :: Key -> Text -> Config -> IO Text
-interpolate prefix s config
+interpolate :: Key -> Key -> Text -> Config -> IO Text
+interpolate prefix key s config
   | "$" `T.isInfixOf` s =
-    case A.parseOnly interp s of
-      Left err   -> throw $ ParseError $ "parsing interpolation: " <> T.pack err
+    case parse interp ("<" ++ T.unpack key ++ ">") s of
+      Left err   -> throw $ ParseError $ T.pack $ errorBundlePretty err
       Right xs -> TL.toStrict . toLazyText . mconcat <$> mapM interpret xs
   | otherwise = return s
 
@@ -78,12 +78,13 @@ interpolate prefix s config
         case toBoundedInteger r :: Maybe Int64 of
           Just n  -> return (decimal n)
           Nothing -> return (realFloat (toRealFloat r :: Double))
-      Just _  -> throw $ ParseError $ "variable '" <> name <> "' is not a string or number"
+      Just _  -> throw $ formatErr $ "variable '" <> name <> "' is not a string or number"
       Nothing -> do
         var <- System.Environment.lookupEnv (T.unpack name)
         case var of
-          Nothing -> throw $ ParseError $ "no such variable: '" <> name <> "'"
+          Nothing -> throw $ formatErr $ "no such variable: '" <> name <> "'"
           Just x  -> return (fromString x)
+  formatErr err = ParseError $ "<" <> key <> ">:\n" <> err <> "\n"
 
 relativize :: Path -> Path -> Path
 relativize parent child

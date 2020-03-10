@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Main where
 
@@ -17,13 +18,28 @@ main = defaultMain tests
 
 tests :: [Test]
 tests =
-    [ testCase "read" readTest
+    [ testCase "read-simple" $ readTest "simple.cfg"
+    , testCase "read-pathological" $ readTest "pathological.cfg"
+    , testCase "load" loadTest
     , testCase "load" loadTest
     , testCase "types" typesTest
     , testCase "interp" interpTest
     , testCase "scoped-interp" scopedInterpTest
     , testCase "import" importTest
     , testCase "readme" readmeTest
+    -- top level parsing errors
+    , testCase "quote-error" $ parseErrorTest "err-single-quote.cfg"
+    -- errors with imported files
+    , testCase "import-error" $ ioErrorTest "err-import.cfg"
+    , testCase "import-error-2" $ parseErrorTest "err-import-2.cfg"
+    -- interpolation parsing errors
+    , testCase "parse-interp-error-1" $ parseErrorTest "err-parse-interp-1.cfg"
+    , testCase "parse-interp-error-2" $ parseErrorTest "err-parse-interp-2.cfg"
+    , testCase "parse-interp-error-3" $ parseErrorTest "err-parse-interp-3.cfg"
+    , testCase "parse-interp-error-4" $ parseErrorTest "err-parse-interp-4.cfg"
+    -- interpolation interpretation errors
+    , testCase "interpolate-error-1" $ parseErrorTest "err-interpolate-1.cfg"
+    , testCase "interpolate-error-2" $ parseErrorTest "err-interpolate-2.cfg"
     ]
 
 withLoad :: FilePath -> (Config -> IO ()) -> IO ()
@@ -31,6 +47,9 @@ withLoad name t = load (testFile name) >>= t
 
 testFile :: FilePath -> FilePath
 testFile name = "tests" </> "resources" </> name
+
+errorFile :: FilePath -> FilePath
+errorFile name = testFile name <> ".err"
 
 parse :: Config -> Parser Value a -> Key -> Either Text a
 parse cfg p key = runParser (required key p) cfg
@@ -41,8 +60,8 @@ parseOpt cfg p key = runParser (optional key p) cfg
 parseSub :: Config -> Parser Value a -> Key -> Either Text [(Key, a)]
 parseSub cfg p prefix = runParser (subassocs prefix p) cfg
 
-readTest :: Assertion
-readTest = load (testFile "pathological.cfg") >> return ()
+readTest :: FilePath -> Assertion
+readTest file = load (testFile file) >> return ()
 
 loadTest :: Assertion
 loadTest =
@@ -204,3 +223,17 @@ readmeTest =
                 [("users.alice", "alice@example.com"), ("users.bob", "bob@example.com")]
                 [("passwords.alice", "secret")]))
       (runParser settingsParser cfg)
+
+parseErrorTest :: FilePath -> Assertion
+parseErrorTest file = do
+  err <- readFile $ errorFile file
+  (load (testFile file) >> assertFailure "expected a parse error")
+    `catch` \ (ParseError err') -> do
+       assertEqual "" err err'
+
+ioErrorTest :: FilePath -> Assertion
+ioErrorTest file = do
+  err <- readFile $ errorFile file
+  (load (testFile file) >> assertFailure "expected an IO error")
+    `catch` \ (ex :: IOException) -> do
+       assertEqual "" err (show ex)

@@ -1,0 +1,6 @@
+tests/resources/err-single-quote.cfg:1:36:
+  |
+1 | app.settings.external_api_secret = 'some_value'
+  |                                    ^^^^^
+unexpected "'some"
+expecting "false", "off", "on", "true", '"', '[', or digit

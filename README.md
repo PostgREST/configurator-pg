@@ -18,7 +18,7 @@ changes the API in other places:
       to supply explicit value parsers.
     - There's only `load` to read and evaluate a configuration file,
       and `runParser` to extract configuration values.
-  * Simpler error handling.
+  * Simpler error handling and improved logging of parse errors.
   * Simplified handling of configuration subsets. There's `subassocs`
     and the unit tests pass, but the author didn't attempt to
     understand the original implementation fully.
@@ -28,9 +28,11 @@ changes the API in other places:
 The original configurator-ng is due to MailRank, Inc., Bryan
 O'Sullivan and Leon P Smith.
 
-The low-level parser (Data.Configurator.Syntax) is mostly unchanged,
-evaluation (Data.Configurator.Load) is also close to the original.
-The high-level parser (Data.Configurator.Parser) is original.
+The low-level parser (Data.Configurator.Syntax) was initially
+mostly unchanged, but has since been rewritten with Megaparsec
+for better error messages. The evaluation (Data.Configurator.Load)
+is still close to the original. The high-level parser
+(Data.Configurator.Parser) is original.
 
 ## File format
 
