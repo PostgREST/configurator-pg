@@ -1,5 +1,7 @@
 # Revision history for configurator-pg
 
+## 0.2.0 -- 2020-03-10
+
 * Rewrite file parser with Megaparsec instead of
   Attoparsec for better error messages. No expected
   change in functionality except possibly in
