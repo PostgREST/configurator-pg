@@ -1,6 +1,6 @@
 cabal-version:       1.12
 name:                configurator-pg
-version:             0.2.0
+version:             0.2.1
 synopsis:            Reduced parser for configurator-ng config files
 description:
   This module provides a simplified and updated interface to the
@@ -23,6 +23,7 @@ copyright:           Copyright 2011 MailRank, Inc.
 category:            Configuration, Data
 extra-source-files:  CHANGELOG.md, README.md,
                      tests/resources/*.cfg,
+                     tests/resources/*.cfg.err,
                      tests/resources/secrets/passwords.txt
 build-type:          Simple
 

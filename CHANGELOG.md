@@ -1,5 +1,9 @@
 # Revision history for configurator-pg
 
+## 0.2.1 -- 2020-03-11
+
+* Include test output files in source release.
+
 ## 0.2.0 -- 2020-03-10
 
 * Rewrite file parser with Megaparsec instead of
