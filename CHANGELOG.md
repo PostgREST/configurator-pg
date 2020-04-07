@@ -1,5 +1,9 @@
 # Revision history for configurator-pg
 
+## 0.2.2 -- 2020-04-07
+
+* Support GHC 8.10.
+
 ## 0.2.1 -- 2020-03-11
 
 * Include test output files in source release.
