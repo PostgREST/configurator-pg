@@ -1,5 +1,9 @@
 # Revision history for configurator-pg
 
+## 0.2.3 -- 2020-04-19
+
+* Drop support for GHC 7.10.
+
 ## 0.2.2 -- 2020-04-07
 
 * Support GHC 8.10.
