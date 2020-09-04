@@ -21,14 +21,11 @@ matrix:
   - ghc: 8.4.4
   - ghc: 8.6.5
   - ghc: 8.8.3
+  - ghc: 8.10.1
 
   # Stack
   - ghc: 8.8.3
     env: STACK_YAML="$TRAVIS_BUILD_DIR/stack.yaml"
-
-  allow-failures:
-  # until protolude 0.3 is released
-  - ghc: 8.10.1
 
 install:
   - |
