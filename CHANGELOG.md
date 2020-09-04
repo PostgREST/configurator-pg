@@ -1,5 +1,9 @@
 # Revision history for configurator-pg
 
+## 0.2.4 -- 2020-09-04
+
+* Allow megaparsec-9.0.
+
 ## 0.2.3 -- 2020-04-19
 
 * Drop support for GHC 7.10.
