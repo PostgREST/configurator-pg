@@ -1,6 +1,6 @@
 cabal-version:       1.12
 name:                configurator-pg
-version:             0.2.4
+version:             0.2.5
 synopsis:            Reduced parser for configurator-ng config files
 description:
   This module provides a simplified and updated interface to the
@@ -51,7 +51,7 @@ test-suite tests
   build-depends:       base                 >= 4.9 && < 4.15
                      , configurator-pg
                      , HUnit                >= 1.3.1.2 && < 1.7
-                     , bytestring           >= 0.10.6 && < 0.11
+                     , bytestring           >= 0.10.6 && < 0.12
                      , filepath             >= 1.4 && < 1.5
                      , protolude            >= 0.1.10 && < 0.4
                      , test-framework       >= 0.8.1.1 && < 0.9
