@@ -1,5 +1,9 @@
 # Revision history for configurator-pg
 
+## 0.2.5 -- 2020-10-26
+
+* Allow bytestring-0.11.
+
 ## 0.2.4 -- 2020-09-04
 
 * Allow megaparsec-9.0.
