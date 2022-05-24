@@ -1,6 +1,6 @@
 cabal-version:       1.12
 name:                configurator-pg
-version:             0.2.5
+version:             0.2.6
 synopsis:            Reduced parser for configurator-ng config files
 description:
   This module provides a simplified and updated interface to the
@@ -19,7 +19,7 @@ maintainer:          rob@vllmrt.net
 copyright:           Copyright 2011 MailRank, Inc.
                      Copyright 2011-2014 Bryan O'Sullivan
                      Copyright 2015-2016 Leon P Smith
-                     Copyright 2019 Robert Vollmert
+                     Copyright 2019-2022 Robert Vollmert
 category:            Configuration, Data
 extra-source-files:  CHANGELOG.md, README.md,
                      tests/resources/*.cfg,
