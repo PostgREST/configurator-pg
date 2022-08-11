@@ -1,6 +1,0 @@
-packages: .
-
-source-repository-package
-  type: git
-  location: https://github.com/protolude/protolude.git
-  tag: 3e249724fd0ead27370c8c297b1ecd38f92cbd5b
