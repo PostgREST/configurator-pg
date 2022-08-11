@@ -1,0 +1,7 @@
+packages: .
+allow-newer:
+  -- https://github.com/protolude/protolude/pull/141
+  protolude:base,
+  protolude:ghc-prim,
+  -- https://github.com/simonmar/async/issues/133
+  async:base
