@@ -20,10 +20,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: haskell/actions/setup@v2
-      with:
-        ghc-version: ${{ matrix.ghc }}
-        cabal-version: '3.2'
+    - name: ghcup
+      run: |
+        ghcup install ghc ${{ matrix.ghc }}
+        ghcup set ghc ${{ matrix.ghc }}
+        ghcup install cabal latest
+        ghcup set cabal latest
 
     - name: Cache
       uses: actions/cache@v3
