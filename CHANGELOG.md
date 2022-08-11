@@ -1,5 +1,9 @@
 # Revision history for configurator-pg
 
+## 0.2.7 -- 2022-08-11
+
+* Allow text-2.0 and GHC 9.4.
+
 ## 0.2.6 -- 2022-05-24
 
 * Allow megaparsec-9.2 and GHC 9.2.
