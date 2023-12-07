@@ -1,7 +1,6 @@
 packages: .
-allow-newer:
-  -- https://github.com/protolude/protolude/pull/141
-  protolude:base,
-  protolude:ghc-prim,
-  -- https://github.com/simonmar/async/issues/133
-  async:base
+
+-- Required only because 'cabal test' needs this with ghc-9.8;
+-- try removing cabal.project in the future.
+tests: True
+
