@@ -1,6 +1,6 @@
 # Revision history for configurator-pg
 
-## 0.2.7 -- 2023-11-26
+## 0.2.8 -- 2023-12-07
 
 * Allow megaparsec-9.5 and GHC 9.4.8.
 
