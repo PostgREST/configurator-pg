@@ -1,6 +1,6 @@
 cabal-version:       1.12
 name:                configurator-pg
-version:             0.2.9
+version:             0.2.10
 synopsis:            Reduced parser for configurator-ng config files
 description:
   This module provides a simplified and updated interface to the
