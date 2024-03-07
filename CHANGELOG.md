@@ -1,5 +1,10 @@
 # Revision history for configurator-pg
 
+## 0.2.10 -- 2024-03-06
+
+* Allow megaparsec-9.6
+* Remove unused bytestring dependency from tests
+
 ## 0.2.9 -- 2023-12-07
 
 * Allow text-2.1 and GHC 9.8.
