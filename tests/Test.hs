@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE CPP #-}
 
 module Main where
 
@@ -7,6 +8,8 @@ import Protolude hiding (bool, list, optional)
 
 import           Data.Configurator
 import qualified Data.Text                      as T
+import qualified GHC.IO.Encoding                as E
+import qualified GHC.IO.Encoding.Latin1         as E
 import           System.Environment
 import           System.FilePath
 import           Test.Framework
@@ -20,6 +23,7 @@ tests :: [Test]
 tests =
     [ testCase "read-simple" $ readTest "simple.cfg"
     , testCase "read-pathological" $ readTest "pathological.cfg"
+    , testCase "read-utf-8-with-ascii-locale" $ readTestWithLocale "utf-8.cfg" E.ascii
     , testCase "load" loadTest
     , testCase "load" loadTest
     , testCase "types" typesTest
@@ -51,6 +55,9 @@ testFile name = "tests" </> "resources" </> name
 errorFile :: FilePath -> FilePath
 errorFile name = testFile name <> ".err"
 
+errorFileGHC8 :: FilePath -> FilePath
+errorFileGHC8 name = testFile name <> ".err.ghc8"
+
 parse :: Config -> Parser Value a -> Key -> Either Text a
 parse cfg p key = runParser (required key p) cfg
 
@@ -62,6 +69,10 @@ parseSub cfg p prefix = runParser (subassocs prefix p) cfg
 
 readTest :: FilePath -> Assertion
 readTest file = load (testFile file) >> return ()
+
+readTestWithLocale :: FilePath -> E.TextEncoding -> Assertion
+readTestWithLocale file locale =
+  E.setLocaleEncoding locale >> load (testFile file) >> return ()
 
 loadTest :: Assertion
 loadTest =
@@ -233,7 +244,11 @@ parseErrorTest file = do
 
 ioErrorTest :: FilePath -> Assertion
 ioErrorTest file = do
+#if __GLASGOW_HASKELL__ >= 900
   err <- readFile $ errorFile file
+#else
+  err <- readFile $ errorFileGHC8 file
+#endif
   (load (testFile file) >> assertFailure "expected an IO error")
     `catch` \ (ex :: IOException) -> do
        assertEqual "" err (show ex)
