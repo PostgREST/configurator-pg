@@ -1,5 +1,9 @@
 # Revision history for configurator-pg
 
+# Unreleased
+
+* Fix loading `utf-8` file when locale encoding is set to `ASCII`
+
 ## 0.2.10 -- 2024-03-06
 
 * Allow megaparsec-9.6

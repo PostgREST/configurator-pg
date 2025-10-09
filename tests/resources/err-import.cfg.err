@@ -1,1 +1,1 @@
-tests/resources/not-exist.cfg: openFile: does not exist (No such file or directory)
+tests/resources/not-exist.cfg: withBinaryFile: does not exist (No such file or directory)

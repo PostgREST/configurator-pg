@@ -34,6 +34,7 @@ library
                        Data.Configurator.Syntax
                        Data.Configurator.Types
   build-depends:       base                 >= 4.9 && < 4.22
+                     , bytestring           >= 0.10.8 && < 0.13
                      , megaparsec           >= 7.0.0 && < 9.8
                      , containers           >= 0.5.6.2 && < 0.8
                      , protolude            >= 0.1.10 && < 0.4

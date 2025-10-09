@@ -6,10 +6,12 @@ import Protolude
 
 import           Control.Exception                (throw)
 import           Text.Megaparsec                  (parse, errorBundlePretty)
+import qualified Data.ByteString                  as BS
 import qualified Data.Map.Strict                  as M
 import           Data.Scientific                  (toBoundedInteger,
                                                    toRealFloat)
 import qualified Data.Text                        as T
+import qualified Data.Text.Encoding               as T
 import qualified Data.Text.Lazy                   as TL
 import           Data.Text.Lazy.Builder           (fromString,
                                                    fromText,
@@ -31,7 +33,7 @@ load path = applyDirective "" "" M.empty (Import $ T.pack path)
 
 loadOne :: Path -> IO [Directive]
 loadOne path = do
-  s <- readFile (T.unpack path)
+  s <- T.decodeUtf8 <$> BS.readFile (T.unpack path)
   case parse topLevel (T.unpack path) s of
     Left err         -> throw $ ParseError $ T.pack $ errorBundlePretty err
     Right directives -> return directives
