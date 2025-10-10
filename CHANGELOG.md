@@ -1,6 +1,6 @@
 # Revision history for configurator-pg
 
-# Unreleased
+## 0.2.11 -- 2025-10-10
 
 * Fix loading `utf-8` file when locale encoding is set to `ASCII`
 
